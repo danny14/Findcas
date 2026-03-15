@@ -1,0 +1,62 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using Findcas.Web.Client.Services
+@inject LocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4" style="justify-content: space-between; display: flex; width: 100%; align-items: center;">
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Findcas v1.0 - Danny Ruiz</MudText>
+
+            <div>
+                <AuthorizeView>
+                    <Authorized>
+                        <MudButton StartIcon="@Icons.Material.Filled.Logout" Variant="Variant.Text" Color="Color.Primary" OnClick="Logout">
+                            Cerrar Sesión
+                        </MudButton>
+                    </Authorized>
+                    <NotAuthorized>
+                        <MudButton Href="/login" Variant="Variant.Text" Color="Color.Primary">Iniciar Sesión</MudButton>
+                        <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" Class="ml-2">Registrarse</MudButton>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+@code {
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("authToken");
+
+        if (AuthStateProvider is CustomAuthStateProvider customProvider)
+        {
+            customProvider.NotifyUserLogout();
+        }
+
+        NavManager.NavigateTo("/", forceLoad: true);
+    }
+}

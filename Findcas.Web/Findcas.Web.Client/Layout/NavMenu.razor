@@ -1,0 +1,75 @@
+﻿@using Microsoft.Extensions.Localization
+@using Findcas.Web.Client.Resources
+@inject IStringLocalizer<App> L
+@inject NavigationManager Navigation
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">@L["AppName"]</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> @L["Nav_Home"]
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="fincas/nueva">
+                <span class="bi bi-house-add-fill-nav-menu" aria-hidden="true"></span> @L["Nav_AddProperty"]
+            </NavLink>
+        </div>
+
+        @* --- MENÚ DE IDIOMAS --- *@
+        <div class="nav-item px-3">
+            <MudMenu Label="@L["Language"]"
+                     StartIcon="@Icons.Material.Filled.Language"
+                     EndIcon="@Icons.Material.Filled.KeyboardArrowDown"
+                     Color="Color.Inherit"
+                     Variant="Variant.Text"
+                     Class="nav-link mud-nav-link-custom">
+                <MudMenuItem OnClick="@(() => ChangeLanguage("es"))">Español</MudMenuItem>
+                <MudMenuItem OnClick="@(() => ChangeLanguage("en"))">English</MudMenuItem>
+            </MudMenu>
+        </div>
+
+        @* Otros links que puedes traducir después *@
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            </NavLink>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private void ChangeLanguage(string culture)
+    {
+        // Obtenemos la URL actual para saber a dónde regresar tras el cambio
+        var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+
+        // Llamamos al controlador que creamos en el servidor
+        var query = $"/Culture/Set?culture={culture}&redirectUri={uri}";
+
+        Navigation.NavigateTo(query, forceLoad: true);
+    }
+}
+
+@* Un pequeño ajuste de estilo para que el menú de MudBlazor combine con el NavMenu *@
+<style>
+    .mud-nav-link-custom {
+        color: rgba(255,255,255,0.5) !important;
+        width: 100%;
+        justify-content: start !important;
+        padding-left: 16px !important;
+    }
+
+        .mud-nav-link-custom:hover {
+            color: white !important;
+        }
+</style>

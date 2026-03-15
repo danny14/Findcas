@@ -1,0 +1,62 @@
+﻿@page "/"
+@using Findcas.Domain.Entities
+@using Findcas.Application.Interfaces
+@using Findcas.Web.Client.Components
+@inject IPropertyService PropertyService
+@using Microsoft.Extensions.Localization
+@using Findcas.Web.Client.Resources
+@inject IStringLocalizer<App> L
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="mb-6">
+        <div>
+            <MudText Typo="Typo.h3" Style="font-weight: 800;">@L["Home_Title"]</MudText>
+            <MudText Typo="Typo.subtitle1">Encuentra el lugar perfecto para tu próximo descanso</MudText>
+        </div>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.FilterList">
+            Filtros
+        </MudButton>
+    </MudStack>
+
+    @if (properties == null)
+    {
+        @* Skeleton / Cargando *@
+        <MudGrid>
+            @for (int i = 0; i < 4; i++)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudSkeleton SkeletonType="SkeletonType.Rectangle" Height="200px" />
+                    <MudSkeleton Class="mt-2" />
+                    <MudSkeleton Width="60%" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else if (!properties.Any())
+    {
+        <MudAlert Severity="Severity.Info" Variant="Variant.Filled" Class="mt-4">
+            Aún no hay fincas registradas. ¡Sé el primero en publicar una!
+        </MudAlert>
+    }
+    else
+    {
+        <MudGrid>
+            @foreach (var finca in properties)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <PropertyCard Property="finca" />
+                </MudItem>
+            }
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    private List<Property>? properties;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        properties = await PropertyService.GetAllPropertiesAsync();
+    }
+}

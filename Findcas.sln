@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36915.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Findcas.Application", "Findcas.Application\Findcas.Application.csproj", "{63FE1422-5772-4D1F-85C8-A0EA08621608}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Findcas.Infrastructure", "Findcas.Infrastructure\Findcas.Infrastructure.csproj", "{BD20E723-B78C-4874-A91E-25092538900E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{63FE1422-5772-4D1F-85C8-A0EA08621608} = {63FE1422-5772-4D1F-85C8-A0EA08621608}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Findcas.Web", "Findcas.Web\Findcas.Web\Findcas.Web.csproj", "{344DD6E3-A4CA-4390-A3C5-E6F8D341B774}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Findcas.Web.Client", "Findcas.Web\Findcas.Web.Client\Findcas.Web.Client.csproj", "{1871D1FE-626F-4032-B24A-3A5F19D012D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Findcas.Domain", "Findcas.Domain\Findcas.Domain.csproj", "{4EC189D2-3182-B661-F441-09D149EE4683}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63FE1422-5772-4D1F-85C8-A0EA08621608}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63FE1422-5772-4D1F-85C8-A0EA08621608}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63FE1422-5772-4D1F-85C8-A0EA08621608}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63FE1422-5772-4D1F-85C8-A0EA08621608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD20E723-B78C-4874-A91E-25092538900E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD20E723-B78C-4874-A91E-25092538900E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD20E723-B78C-4874-A91E-25092538900E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD20E723-B78C-4874-A91E-25092538900E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{344DD6E3-A4CA-4390-A3C5-E6F8D341B774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{344DD6E3-A4CA-4390-A3C5-E6F8D341B774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{344DD6E3-A4CA-4390-A3C5-E6F8D341B774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{344DD6E3-A4CA-4390-A3C5-E6F8D341B774}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1871D1FE-626F-4032-B24A-3A5F19D012D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1871D1FE-626F-4032-B24A-3A5F19D012D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1871D1FE-626F-4032-B24A-3A5F19D012D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1871D1FE-626F-4032-B24A-3A5F19D012D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EC189D2-3182-B661-F441-09D149EE4683}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EC189D2-3182-B661-F441-09D149EE4683}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EC189D2-3182-B661-F441-09D149EE4683}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EC189D2-3182-B661-F441-09D149EE4683}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FE6AAE24-AE86-483E-9CB6-65B66D0167F4}
+	EndGlobalSection
+EndGlobal

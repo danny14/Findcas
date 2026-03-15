@@ -1,0 +1,81 @@
+﻿@page "/login"
+@using Findcas.Web.Client.Models
+@using Findcas.Web.Client.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthHttpClient AuthClient
+@inject LocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavManager
+@inject ISnackbar Snackbar
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-16">
+    <MudPaper Elevation="4" Class="pa-8 rounded-lg">
+        <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-6 font-weight-bold">Iniciar Sesión</MudText>
+
+        <EditForm Model="@_loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+
+            <MudStack Spacing="4">
+                <MudTextField @bind-Value="_loginModel.Email"
+                              Label="Correo Electrónico"
+                              Variant="Variant.Outlined"
+                              For="@(() => _loginModel.Email)" />
+
+                <MudTextField @bind-Value="_loginModel.Password"
+                              Label="Contraseña"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password"
+                              For="@(() => _loginModel.Password)" />
+
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Class="mt-4" Disabled="@_isLoading">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Iniciando...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Entrar</MudText>
+                    }
+                </MudButton>
+            </MudStack>
+        </EditForm>
+
+        <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-6">
+            ¿No tienes una cuenta? <MudLink Href="/register">Regístrate aquí</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private LoginDto _loginModel = new();
+    private bool _isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        _isLoading = true;
+
+
+        var response = await AuthClient.LoginAsync(_loginModel);
+
+        if (!string.IsNullOrEmpty(response.Token))
+        {
+
+            await LocalStorage.SetItemAsync("authToken", response.Token);
+
+            if (AuthStateProvider is CustomAuthStateProvider customProvider)
+            {
+                customProvider.NotifyUserAuthentication(response.Token);
+            }
+
+            Snackbar.Add("¡Bienvenido de vuelta!", Severity.Success);
+            NavManager.NavigateTo("/", forceLoad: true);
+        }
+        else
+        {
+            Snackbar.Add(response.Mensaje ?? "Error al iniciar sesión.", Severity.Error);
+        }
+
+        _isLoading = false;
+    }
+}

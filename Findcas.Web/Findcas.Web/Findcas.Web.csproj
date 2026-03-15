@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<NoWarn>$(NoWarn);NU1605;CS0436</NoWarn>
+		<UserSecretsId>4d1d6e75-e1cb-42bb-962e-e16a204e6bbf</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Findcas.Application\Findcas.Application.csproj" />
+		<ProjectReference Include="..\..\Findcas.Infrastructure\Findcas.Infrastructure.csproj" />
+		<ProjectReference Include="..\Findcas.Web.Client\Findcas.Web.Client.csproj" />
+
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.11" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.11" />
+
+		<PackageReference Include="MudBlazor" Version="7.15.0" />
+
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+
+		<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+	</ItemGroup>
+
+</Project>

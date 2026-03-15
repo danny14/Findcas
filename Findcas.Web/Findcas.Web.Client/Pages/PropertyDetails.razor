@@ -1,0 +1,106 @@
+﻿@page "/finca/{Id:int}"
+@using Findcas.Domain.Entities
+@using Findcas.Application.Interfaces
+@using MudBlazor
+@inject IPropertyService PropertyService
+@inject NavigationManager NavManager
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-8">
+    @if (_isLoading)
+    {
+        <MudStack AlignItems="AlignItems.Center" Justify="Justify.Center" Class="mt-16">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+            <MudText Typo="Typo.h6">Cargando detalles de la finca...</MudText>
+        </MudStack>
+    }
+    else if (_property == null)
+    {
+        <MudAlert Severity="Severity.Error" Class="mt-8">Lo sentimos, no pudimos encontrar la finca que buscas.</MudAlert>
+        <MudButton Class="mt-4" Variant="Variant.Outlined" Color="Color.Primary" OnClick="GoBack">Volver al inicio</MudButton>
+    }
+    else
+    {
+        <MudButton StartIcon="@Icons.Material.Filled.ArrowBack" Color="Color.Default" Class="mb-4" OnClick="GoBack">
+            Volver
+        </MudButton>
+
+        <MudGrid>
+            @* COLUMNA IZQUIERDA: Imagen principal *@
+            <MudItem xs="12" md="7" lg="8">
+                <MudPaper Elevation="3" Class="rounded-lg overflow-hidden">
+                    @* 1. Envolvemos el método y usamos Style para las dimensiones *@
+                    <MudImage Src="@(GetMainImage())" Alt="@(_property.Name)" ObjectFit="ObjectFit.Cover" Style="width: 100%; height: 500px;" />
+                </MudPaper>
+
+                @* 2. Envolvemos las propiedades en @(...) *@
+                <MudText Typo="Typo.h4" Class="mt-6 font-weight-bold">@(_property.Name)</MudText>
+                <MudText Typo="Typo.subtitle1" Color="Color.Secondary" Class="mb-4 d-flex align-center">
+                    <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
+                    @(_property.City), @(_property.Department)
+                </MudText>
+
+                <MudDivider Class="my-4" />
+
+                <MudText Typo="Typo.h6" Class="mb-2">Acerca de este lugar</MudText>
+                <MudText Typo="Typo.body1">@(_property.Description)</MudText>
+            </MudItem>
+
+            @* COLUMNA DERECHA: Tarjeta de Reserva y Detalles *@
+            <MudItem xs="12" md="5" lg="4">
+                <MudPaper Elevation="4" Class="pa-6 rounded-lg" Style="position: sticky; top: 20px;">
+
+                    @* 3. Blindamos el ToString() para que Blazor no se confunda con el paréntesis *@
+                    <MudText Typo="Typo.h4" Color="Color.Primary" Class="font-weight-bold mb-1">
+                        @(_property.PricePerNight.ToString("C0"))
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">por noche</MudText>
+
+                    <MudStack Spacing="2" Class="mb-6">
+                        <MudPaper Elevation="0" Outlined="true" Class="pa-3 d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Groups" Color="Color.Default" Class="mr-3" />
+                            <MudText><strong>Máx. Huéspedes:</strong> @(_property.MaxGuests)</MudText>
+                        </MudPaper>
+                        <MudPaper Elevation="0" Outlined="true" Class="pa-3 d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Bed" Color="Color.Default" Class="mr-3" />
+                            <MudText><strong>Habitaciones:</strong> @(_property.Bedrooms)</MudText>
+                        </MudPaper>
+                        <MudPaper Elevation="0" Outlined="true" Class="pa-3 d-flex align-center">
+                            <MudIcon Icon="@Icons.Material.Filled.Bathtub" Color="Color.Default" Class="mr-3" />
+                            <MudText><strong>Baños:</strong> @(_property.Bathrooms)</MudText>
+                        </MudPaper>
+                    </MudStack>
+
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Large" FullWidth="true" Class="rounded-pill py-3">
+                        Solicitar Reserva
+                    </MudButton>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    }
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Property? _property;
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        _property = await PropertyService.GetPropertyByIdAsync(Id);
+        _isLoading = false;
+    }
+
+    private string GetMainImage()
+    {
+        return _property?.Images?.FirstOrDefault()?.Url
+            ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=1000";
+    }
+
+    private void GoBack()
+    {
+        NavManager.NavigateTo("/");
+    }
+}

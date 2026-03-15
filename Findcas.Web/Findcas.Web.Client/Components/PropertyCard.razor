@@ -1,0 +1,40 @@
+﻿@using Findcas.Domain.Entities
+@using MudBlazor
+@using Microsoft.Extensions.Localization
+@using Findcas.Web.Client.Resources
+@inject IStringLocalizer<App> L
+
+<MudCard Elevation="4" Class="rounded-lg h-100 d-flex flex-column">
+    <MudCardMedia Image="@GetImageUrl()"
+                  Height="200" />
+    <MudCardContent>
+        <MudText Typo="Typo.h6">@Property.Name</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary">
+            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" /> @Property.City, @Property.Department
+        </MudText>
+        <MudText Typo="Typo.body1" Class="mt-2" Style="font-weight: bold;">
+            @Property.PricePerNight.ToString("C0") / @L["Card_PricePerNight"]
+        </MudText>
+
+        <MudStack Row="true" Class="mt-2" Spacing="1">
+            <MudChip T="string" Icon="@Icons.Material.Filled.Bed" Variant="Variant.Text">@Property.Bedrooms</MudChip>
+            <MudChip T="string" Icon="@Icons.Material.Filled.Bathtub" Variant="Variant.Text">@Property.Bathrooms</MudChip>
+            <MudChip T="string" Icon="@Icons.Material.Filled.Groups" Variant="Variant.Text">@Property.MaxGuests</MudChip>
+        </MudStack>
+    </MudCardContent>
+    <MudSpacer />
+    <MudCardActions>
+        <MudButton Href="@($"/finca/{Property.Id}")" Variant="Variant.Text" Color="Color.Primary" FullWidth="true">@L["Card_ViewDetails"]</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">@L["Card_Rent"]</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter] public Property Property { get; set; } = null!;
+
+    private string GetImageUrl()
+    {
+        return Property?.Images?.FirstOrDefault()?.Url
+            ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=500";
+    }
+}

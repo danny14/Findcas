@@ -1,0 +1,19 @@
+﻿@inject NavigationManager Navigation
+
+<MudMenu Icon="@Icons.Material.Filled.Language" Color="Color.Inherit" Edge="Edge.End">
+    <MudMenuItem OnClick="@(() => ChangeLanguage("es"))">
+        <MudText>Español</MudText>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => ChangeLanguage("en"))">
+        <MudText>English</MudText>
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    private void ChangeLanguage(string culture)
+    {
+        var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var query = $"/Culture/Set?culture={culture}&redirectUri={uri}";
+        Navigation.NavigateTo(query, forceLoad: true);
+    }
+}

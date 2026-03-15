@@ -1,0 +1,106 @@
+﻿@page "/fincas/nueva"
+@using Findcas.Domain.Entities
+@using Findcas.Application.Interfaces
+@using Microsoft.Extensions.Localization
+@using Findcas.Web.Client.Resources
+@inject IPropertyService PropertyService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavManager
+@inject IStringLocalizer<App> L
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudText Typo="Typo.h4" GutterBottom="true">@L["Nav_AddProperty"]</MudText>
+    
+    <MudPaper Class="pa-8">
+        <MudForm @ref="form" @bind-IsValid="@success">
+            <MudGrid>
+                <MudItem xs="12" sm="7">
+                    <MudTextField T="string" Label="Nombre de la Finca" Required="true" 
+                                  @bind-Value="property.Name" For="@(() => property.Name)" />
+                </MudItem>
+                <MudItem xs="12" sm="5">
+                    <MudNumericField T="decimal" Label="Precio por Noche" Format="C" 
+                                     @bind-Value="property.PricePerNight" />
+                </MudItem>
+                
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Descripción" Lines="3" 
+                                  @bind-Value="property.Description" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" Label="Ciudad" @bind-Value="property.City" Required="true" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" Label="Departamento" @bind-Value="property.Department" Required="true" />
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <MudNumericField T="int" Label="Habitaciones" @bind-Value="property.Bedrooms" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudNumericField T="int" Label="Baños" @bind-Value="property.Bathrooms" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <MudNumericField T="int" Label="Máx. Personas" @bind-Value="property.MaxGuests" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2">Foto de la Finca</MudText>
+
+                    @* En MudBlazor 7 usamos T="IBrowserFile" y ActivatorContent *@
+                    <MudFileUpload T="IBrowserFile" FilesChanged="OnFilesChanged" Accept=".jpg, .png, .jpeg">
+                        <ActivatorContent>
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.PhotoCamera">
+                                Seleccionar Foto
+                            </MudButton>
+                        </ActivatorContent>
+                    </MudFileUpload>
+
+                    @if (_file != null)
+                    {
+                        <MudAlert Severity="Severity.Info" NoIcon="true" Class="mt-2 py-1">
+                            Archivo: @_file.Name
+                        </MudAlert>
+                    }
+                </MudItem>
+                @* ---------------------------------------- *@
+
+                <MudItem xs="12" Class="d-flex justify-end mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                               Disabled="@(!success)" OnClick="SaveProperty">@L["Common_Save"]</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    bool success;
+    MudForm form = null!;
+    Property property = new Property();
+    private IBrowserFile? _file; // Almacena el archivo seleccionado
+
+    private void OnFilesChanged(IBrowserFile file)
+    {
+        _file = file;
+    }
+
+    private async Task SaveProperty()
+    {
+        try 
+        {
+
+            await PropertyService.CreatePropertyAsync(property, _file);
+            
+            Snackbar.Add("¡Finca guardada con éxito!", Severity.Success);
+            NavManager.NavigateTo("/"); 
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error al guardar: " + ex.Message, Severity.Error);
+        }
+    }
+}

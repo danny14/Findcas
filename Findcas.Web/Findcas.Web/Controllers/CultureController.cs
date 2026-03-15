@@ -1,0 +1,23 @@
+﻿using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Findcas.Web.Controllers
+{
+    [Route("[controller]/[action]")]
+    public class CultureController : Controller
+    {
+        [HttpGet]
+        public IActionResult Set(string culture, string redirectUri)
+        {
+            if (culture != null)
+            {
+                Response.Cookies.Append(
+                    CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture, culture)));
+            }
+
+
+            return LocalRedirect(redirectUri);
+        }
+    }
+}

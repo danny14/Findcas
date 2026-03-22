@@ -1,8 +1,12 @@
 ﻿@page "/finca/{Id:int}"
 @using Findcas.Domain.Entities
 @using Findcas.Application.Interfaces
+@using Findcas.Web.Client.Services
+@using Findcas.Web.Client.Models
 @using MudBlazor
 @inject IPropertyService PropertyService
+@inject ReservationHttpClient ReservationClient
+@inject ISnackbar Snackbar
 @inject NavigationManager NavManager
 
 <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-8">
@@ -28,11 +32,9 @@
             @* COLUMNA IZQUIERDA: Imagen principal *@
             <MudItem xs="12" md="7" lg="8">
                 <MudPaper Elevation="3" Class="rounded-lg overflow-hidden">
-                    @* 1. Envolvemos el método y usamos Style para las dimensiones *@
                     <MudImage Src="@(GetMainImage())" Alt="@(_property.Name)" ObjectFit="ObjectFit.Cover" Style="width: 100%; height: 500px;" />
                 </MudPaper>
 
-                @* 2. Envolvemos las propiedades en @(...) *@
                 <MudText Typo="Typo.h4" Class="mt-6 font-weight-bold">@(_property.Name)</MudText>
                 <MudText Typo="Typo.subtitle1" Color="Color.Secondary" Class="mb-4 d-flex align-center">
                     <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
@@ -43,13 +45,35 @@
 
                 <MudText Typo="Typo.h6" Class="mb-2">Acerca de este lugar</MudText>
                 <MudText Typo="Typo.body1">@(_property.Description)</MudText>
+                <MudDivider Class="my-6" />
+
+                <MudText Typo="Typo.h5" Class="mb-4 font-weight-bold">Lo que este lugar ofrece</MudText>
+
+                @if (_property.Amenities != null && _property.Amenities.Any())
+                {
+                    <MudGrid Class="mb-6">
+                        @foreach (var amenity in _property.Amenities)
+                        {
+                            <MudItem xs="12" sm="6" Class="d-flex align-center mb-2">
+                                <MudIcon Icon="@amenity.Icon" Size="Size.Medium" Class="mr-4" />
+                                <MudText Typo="Typo.body1">@amenity.Name</MudText>
+                            </MudItem>
+                        }
+                    </MudGrid>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-6">
+                        Aún no se han detallado los servicios de esta finca.
+                    </MudText>
+                }
+
             </MudItem>
 
             @* COLUMNA DERECHA: Tarjeta de Reserva y Detalles *@
             <MudItem xs="12" md="5" lg="4">
                 <MudPaper Elevation="4" Class="pa-6 rounded-lg" Style="position: sticky; top: 20px;">
 
-                    @* 3. Blindamos el ToString() para que Blazor no se confunda con el paréntesis *@
                     <MudText Typo="Typo.h4" Color="Color.Primary" Class="font-weight-bold mb-1">
                         @(_property.PricePerNight.ToString("C0"))
                     </MudText>
@@ -70,9 +94,47 @@
                         </MudPaper>
                     </MudStack>
 
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Large" FullWidth="true" Class="rounded-pill py-3">
-                        Solicitar Reserva
+                    @* --- NUEVO: CALENDARIO Y CÁLCULO DE PRECIO --- *@
+                    <MudDateRangePicker Label="Fechas de estadía"
+                                        @bind-DateRange="_dateRange"
+                                        MinDate="DateTime.Today"
+                                        Color="Color.Primary"
+                                        Class="mb-4" IsDateDisabledFunc="IsDateDisabled" />
+
+                    @if (_dateRange?.Start != null && _dateRange?.End != null)
+                    {
+                        <MudPaper Elevation="0" Class="pa-3 mb-4 rounded" Style="background-color: var(--mud-palette-background-grey);">
+                            <MudText Typo="Typo.body1" Class="d-flex justify-space-between mb-1">
+                                <span>$@(_property.PricePerNight.ToString("N0")) x @CalcularNoches() noches</span>
+                                <span>$@CalcularTotal().ToString("N0")</span>
+                            </MudText>
+                            <MudDivider Class="my-2" />
+                            <MudText Typo="Typo.h6" Class="d-flex justify-space-between font-weight-bold">
+                                <span>Total a pagar</span>
+                                <span>$@CalcularTotal().ToString("N0")</span>
+                            </MudText>
+                        </MudPaper>
+                    }
+
+                    @* --- BOTÓN DE RESERVA DINÁMICO --- *@
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Secondary"
+                               Size="Size.Large"
+                               FullWidth="true"
+                               Class="rounded-pill py-3"
+                               OnClick="HacerReserva"
+                               Disabled="@_isSubmitting">
+                        @if (_isSubmitting)
+                        {
+                            <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                            <MudText Class="ms-2">Procesando...</MudText>
+                        }
+                        else
+                        {
+                            <MudText>Solicitar Reserva</MudText>
+                        }
                     </MudButton>
+
                 </MudPaper>
             </MudItem>
         </MudGrid>
@@ -86,11 +148,22 @@
     private Property? _property;
     private bool _isLoading = true;
 
+    // --- VARIABLES DEL CALENDARIO ---
+    private MudBlazor.DateRange _dateRange = new MudBlazor.DateRange(DateTime.Today, DateTime.Today.AddDays(1));
+    private bool _isSubmitting = false;
+    private List<BookedDateDto> _bookedDates = new();
+
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
         _property = await PropertyService.GetPropertyByIdAsync(Id);
+
+        if (_property != null)
+        {
+            _bookedDates = await ReservationClient.GetBookedDatesAsync(Id);
+        }
         _isLoading = false;
+
     }
 
     private string GetMainImage()
@@ -103,4 +176,61 @@
     {
         NavManager.NavigateTo("/");
     }
+
+    // --- LÓGICA DE RESERVAS ---
+    private int CalcularNoches()
+    {
+        if (_dateRange?.Start == null || _dateRange?.End == null) return 0;
+
+        var noches = (_dateRange.End.Value - _dateRange.Start.Value).Days;
+        return noches > 0 ? noches : 1; // Mínimo 1 noche
+    }
+
+    private decimal CalcularTotal()
+    {
+        if (_property == null) return 0;
+        return CalcularNoches() * _property.PricePerNight;
+    }
+
+    private async Task HacerReserva()
+    {
+        if (_property == null) return;
+
+        if (_dateRange?.Start == null || _dateRange?.End == null)
+        {
+            Snackbar.Add("Por favor selecciona las fechas completas.", Severity.Warning);
+            return;
+        }
+
+        _isSubmitting = true;
+
+        var dto = new CreateReservationDto
+        {
+            PropertyId = _property.Id,
+            StartDate = _dateRange.Start.Value,
+            EndDate = _dateRange.End.Value,
+            TotalPrice = CalcularTotal()
+        };
+
+        var resultado = await ReservationClient.CreateReservationAsync(dto);
+
+        if (resultado == "OK")
+        {
+            Snackbar.Add("¡Reserva solicitada con éxito!", Severity.Success);
+            // Reiniciamos las fechas después de una reserva exitosa
+            _dateRange = new MudBlazor.DateRange(DateTime.Today, DateTime.Today.AddDays(1));
+        }
+        else
+        {
+            Snackbar.Add(resultado, Severity.Error);
+        }
+
+        _isSubmitting = false;
+    }
+
+    private bool IsDateDisabled(DateTime date)
+    {
+        return _bookedDates.Any(b => date.Date >= b.StartDate.Date && date.Date <= b.EndDate.Date);
+    }
+
 }

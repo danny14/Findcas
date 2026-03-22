@@ -1,5 +1,6 @@
 ﻿@using Microsoft.Extensions.Localization
 @using Findcas.Web.Client.Resources
+@using Microsoft.AspNetCore.Components.Authorization
 @inject IStringLocalizer<App> L
 @inject NavigationManager Navigation
 
@@ -25,6 +26,18 @@
             </NavLink>
         </div>
 
+        @* --- MENÚ DE RESERVAS (SOLO PARA USUARIOS LOGUEADOS) --- *@
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    @* Ruta estricta en inglés, texto visible en español (o puedes usar @L["Nav_MyReservations"] si lo agregas a tus recursos) *@
+                    <NavLink class="nav-link" href="my-reservations">
+                        <span class="bi bi-calendar-check-fill-nav-menu" aria-hidden="true"></span> Mis Reservas
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+
         @* --- MENÚ DE IDIOMAS --- *@
         <div class="nav-item px-3">
             <MudMenu Label="@L["Language"]"
@@ -37,30 +50,18 @@
                 <MudMenuItem OnClick="@(() => ChangeLanguage("en"))">English</MudMenuItem>
             </MudMenu>
         </div>
-
-        @* Otros links que puedes traducir después *@
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
     </nav>
 </div>
 
 @code {
     private void ChangeLanguage(string culture)
     {
-        // Obtenemos la URL actual para saber a dónde regresar tras el cambio
         var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
-
-        // Llamamos al controlador que creamos en el servidor
         var query = $"/Culture/Set?culture={culture}&redirectUri={uri}";
-
         Navigation.NavigateTo(query, forceLoad: true);
     }
 }
 
-@* Un pequeño ajuste de estilo para que el menú de MudBlazor combine con el NavMenu *@
 <style>
     .mud-nav-link-custom {
         color: rgba(255,255,255,0.5) !important;

@@ -98,6 +98,13 @@ namespace Findcas.Web.Controllers
             }
         }
 
+        [HttpGet("cities/search")]
+        public async Task<ActionResult<IEnumerable<string>>> SearchColombiaCities([FromQuery] string searchQuery)
+        {
+            var cities = await _propertyService.SearchColombiaCitiesAsync(searchQuery);
+            return Ok(cities);
+        }
+
 
     }
 }

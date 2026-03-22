@@ -33,6 +33,7 @@ namespace Findcas.Infrastructure.Services
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Amenities)
                 .ToListAsync();
         }
 
@@ -40,7 +41,24 @@ namespace Findcas.Infrastructure.Services
         {
             return await _context.Properties
                 .Include(p => p.Images)
+                .Include(p => p.Amenities)
                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<IEnumerable<string>> SearchColombiaCitiesAsync(string searchQuery)
+        {
+
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return new List<string>();
+            }
+
+            return await _context.Cities
+                .Include(c => c.State)
+                .Where(c => c.State.CountryId == 47 && c.Name.Contains(searchQuery))
+                .Take(10)
+                .Select(c => $"{c.Name}, {c.State.Name}")
+                .ToListAsync();
         }
     }
 }

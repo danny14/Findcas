@@ -3,38 +3,67 @@
 @using Microsoft.Extensions.Localization
 @using Findcas.Web.Client.Resources
 @inject IStringLocalizer<App> L
+@inject NavigationManager Navigation
 
-<MudCard Elevation="4" Class="rounded-lg h-100 d-flex flex-column">
-    <MudCardMedia Image="@GetImageUrl()"
-                  Height="200" />
-    <MudCardContent>
-        <MudText Typo="Typo.h6">@Property.Name</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary">
-            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" /> @Property.City, @Property.Department
-        </MudText>
-        <MudText Typo="Typo.body1" Class="mt-2" Style="font-weight: bold;">
-            @Property.PricePerNight.ToString("C0") / @L["Card_PricePerNight"]
+<MudPaper Elevation="0" Class="property-card" @onclick="GoToDetails">
+    <div class="image-container mb-3">
+        <MudImage Src="@GetImageUrl()" Alt="@Property.Name" ObjectFit="ObjectFit.Cover" Class="rounded-lg property-image" />
+    </div>
+
+    <div class="px-1">
+        <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-truncate">@Property.Name</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-1 text-truncate">
+            @Property.City, @Property.Department
         </MudText>
 
-        <MudStack Row="true" Class="mt-2" Spacing="1">
-            <MudChip T="string" Icon="@Icons.Material.Filled.Bed" Variant="Variant.Text">@Property.Bedrooms</MudChip>
-            <MudChip T="string" Icon="@Icons.Material.Filled.Bathtub" Variant="Variant.Text">@Property.Bathrooms</MudChip>
-            <MudChip T="string" Icon="@Icons.Material.Filled.Groups" Variant="Variant.Text">@Property.MaxGuests</MudChip>
+        @* ¡Regresamos a tus MudChips ganadores! Ajustados al tamaño del nuevo diseño *@
+        <MudStack Row="true" Class="mt-1 mb-2 flex-wrap" Spacing="2">
+            <MudChip T="string" Icon="@Icons.Material.Filled.Groups" Variant="Variant.Text" Size="Size.Small">@Property.MaxGuests</MudChip>
+            <MudChip T="string" Icon="@Icons.Material.Filled.Bed" Variant="Variant.Text" Size="Size.Small">@Property.Bedrooms</MudChip>
+            <MudChip T="string" Icon="@Icons.Material.Filled.Bathtub" Variant="Variant.Text" Size="Size.Small">@Property.Bathrooms</MudChip>
         </MudStack>
-    </MudCardContent>
-    <MudSpacer />
-    <MudCardActions>
-        <MudButton Href="@($"/finca/{Property.Id}")" Variant="Variant.Text" Color="Color.Primary" FullWidth="true">@L["Card_ViewDetails"]</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Secondary" FullWidth="true">@L["Card_Rent"]</MudButton>
-    </MudCardActions>
-</MudCard>
+
+        <MudText Typo="Typo.body1" Class="mt-1">
+            <span class="font-weight-bold">$@Property.PricePerNight.ToString("N0")</span> @L["Card_PricePerNight"]
+        </MudText>
+    </div>
+</MudPaper>
 
 @code {
-    [Parameter] public Property Property { get; set; } = null!;
+    [Parameter]
+    public Property Property { get; set; } = null!;
 
     private string GetImageUrl()
     {
         return Property?.Images?.FirstOrDefault()?.Url
             ?? "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=500";
     }
+
+    private void GoToDetails()
+    {
+        Navigation.NavigateTo($"/finca/{Property.Id}");
+    }
 }
+
+<style>
+    .property-card {
+        cursor: pointer;
+        background-color: transparent;
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .property-card:hover {
+            transform: scale(1.02);
+        }
+
+    .image-container {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+    }
+
+    .property-image {
+        width: 100%;
+        height: 100%;
+    }
+</style>

@@ -75,22 +75,20 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<IImageService, CloudinaryService>();
 builder.Services.AddScoped<LocalStorageService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
 
 
-builder.Services.AddScoped<AuthHttpClient>(sp =>
+Action<IServiceProvider, HttpClient> configureHttpClient = (sp, client) =>
 {
-    // Obtiene el contexto actual (la petición HTTP) para saber en qué URL está corriendo el servidor
     var contextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
     var request = contextAccessor.HttpContext?.Request;
+    var baseUri = request != null ? $"{request.Scheme}://{request.Host}/" : "http://localhost:5013/";
 
-    // Si no hay request (algo raro en prerendering), usamos una por defecto segura
-    var baseUri = request != null
-        ? $"{request.Scheme}://{request.Host}/"
-        : "http://localhost:5013/"; 
+    client.BaseAddress = new Uri(baseUri);
+};
 
-    var httpClient = new HttpClient { BaseAddress = new Uri(baseUri) };
-    return new AuthHttpClient(httpClient);
-});
+builder.Services.AddHttpClient<AuthHttpClient>(configureHttpClient);
+builder.Services.AddHttpClient<ReservationHttpClient>(configureHttpClient);
 
 //builder.Services.AddHttpClient<AuthHttpClient>(client =>
 //{

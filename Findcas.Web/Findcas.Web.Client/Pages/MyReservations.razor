@@ -1,0 +1,64 @@
+﻿@page "/my-reservations"
+@using Findcas.Web.Client.Services
+@using Findcas.Web.Client.Models
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject ReservationHttpClient ReservationClient
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8 mb-8">
+    <MudText Typo="Typo.h4" Class="mb-6 font-weight-bold">Mis Reservas</MudText>
+
+    @if (_isLoading)
+    {
+        <MudStack AlignItems="AlignItems.Center" Class="mt-8">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            <MudText>Cargando tu historial...</MudText>
+        </MudStack>
+    }
+    else if (!_reservations.Any())
+    {
+        <MudAlert Severity="Severity.Info" Class="mt-4">
+            Aún no tienes ninguna reserva. ¡Anímate a explorar nuestras fincas!
+        </MudAlert>
+        <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary" Class="mt-4">Explorar Fincas</MudButton>
+    }
+    else
+    {
+        <MudTable Items="@_reservations" Hover="true" Elevation="3" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Finca</MudTh>
+                <MudTh>Ubicación</MudTh>
+                <MudTh>Entrada</MudTh>
+                <MudTh>Salida</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Estado</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Finca">
+                    <strong>@context.Property?.Name</strong>
+                </MudTd>
+                <MudTd DataLabel="Ubicación">@context.Property?.City</MudTd>
+                <MudTd DataLabel="Entrada">@context.StartDate.ToShortDateString()</MudTd>
+                <MudTd DataLabel="Salida">@context.EndDate.ToShortDateString()</MudTd>
+                <MudTd DataLabel="Total">@context.TotalPrice.ToString("C0")</MudTd>
+                <MudTd DataLabel="Estado">
+                    <MudChip T="string" Color="Color.Success" Size="Size.Small">@context.Status</MudChip>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager HideRowsPerPage="true" />
+            </PagerContent>
+        </MudTable>
+    }
+</MudContainer>
+
+@code {
+    private List<ReservationResponseDto> _reservations = new();
+    private bool _isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _reservations = await ReservationClient.GetMyReservationsAsync();
+        _isLoading = false;
+    }
+}

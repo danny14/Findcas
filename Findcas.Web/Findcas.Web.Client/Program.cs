@@ -11,10 +11,12 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<LocalStorageService>();
 builder.Services.AddScoped<IPropertyService, PropertyHttpClient>();
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthHttpClient>();
+builder.Services.AddScoped<ReservationHttpClient>();
 
 builder.Services.AddLocalization();
 

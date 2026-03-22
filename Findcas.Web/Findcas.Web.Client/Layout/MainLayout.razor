@@ -1,62 +1,142 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.Extensions.Localization
+@using Findcas.Web.Client.Resources
 @using Microsoft.AspNetCore.Components.Authorization
-@using Findcas.Web.Client.Services
-@inject LocalStorageService LocalStorage
-@inject AuthenticationStateProvider AuthStateProvider
-@inject NavigationManager NavManager
+@inject IStringLocalizer<App> L
+@inject NavigationManager Navigation
 
 <MudThemeProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 <MudPopoverProvider />
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<MudLayout>
+    @* --- NUEVO: BARRA DE NAVEGACIÓN SUPERIOR (HEADER) --- *@
+    <MudAppBar Elevation="1" Color="Color.Surface" ToolBarClass="px-6">
+        @* Logo / Nombre de la App a la izquierda (clickable a home) *@
+        <MudText Typo="Typo.h5" Color="Color.Primary" Class="font-weight-bold" style="cursor: pointer" @onclick="@(() => Navigation.NavigateTo("/"))">
+            Findcas
+        </MudText>
+        
+        <MudSpacer />
+        
+        @* Enlaces de navegación principales en el centro (solo visibles en PC) *@
+        <MudHidden Breakpoint="Breakpoint.MdAndDown">
+            <MudButton Href="/" Variant="Variant.Text" Color="Color.Inherit" Class="mr-2">@L["Nav_Home"]</MudButton>
+            <MudButton Href="fincas/nueva" Variant="Variant.Text" Color="Color.Inherit">@L["Nav_AddProperty"]</MudButton>
+        </MudHidden>
+        
+        <MudSpacer />
 
-    <main>
-        <div class="top-row px-4" style="justify-content: space-between; display: flex; width: 100%; align-items: center;">
-            <MudText Typo="Typo.caption" Class="mud-text-secondary">Findcas v1.0 - Danny Ruiz</MudText>
+        @* Selector de idioma *@
+        <MudMenu Label="@L["Language"]" StartIcon="@Icons.Material.Filled.Language" EndIcon="@Icons.Material.Filled.KeyboardArrowDown" Color="Color.Inherit" Variant="Variant.Text" Class="mx-2">
+            <MudMenuItem OnClick="@(() => ChangeLanguage("es"))">Español</MudMenuItem>
+            <MudMenuItem OnClick="@(() => ChangeLanguage("en"))">English</MudMenuItem>
+        </MudMenu>
+        
+        <AuthorizeView>
+            <NotAuthorized>
+                <MudButton Href="authentication/login" Variant="Variant.Text" Color="Color.Inherit" Class="mr-2">Login</MudButton>
+                <MudButton Href="authentication/register" Variant="Variant.Filled" Color="Color.Primary" Class="rounded-pill">Register</MudButton>
+            </NotAuthorized>
+            <Authorized>
+                @* Aquí iría el menú de usuario *@
+                <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Color="Color.Primary" AnchorOrigin="Origin.BottomRight">
+                    <MudMenuItem Href="my-reservations">Mis Reservas</MudMenuItem>
+                    <MudDivider />
+                    <MudMenuItem Icon="@Icons.Material.Filled.Logout">Cerrar Sesión</MudMenuItem>
+                </MudMenu>
+            </Authorized>
+        </AuthorizeView>
+        
+        @* Botón de menú móvil *@
+        <MudHidden Breakpoint="Breakpoint.LgAndUp">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.End" @onclick="@((e) => _drawerOpen = !_drawerOpen)" />
+        </MudHidden>
+    </MudAppBar>
 
-            <div>
+    @* --- MENÚ MÓVIL (DRAWER) --- *@
+    <MudHidden Breakpoint="Breakpoint.LgAndUp">
+        <MudDrawer @bind-Open="_drawerOpen" Anchor="Anchor.Top" Elevation="2" Class="pa-4 pt-16">
+            <MudNavMenu>
+                <MudNavLink Href="/" Icon="@Icons.Material.Filled.TravelExplore">@L["Nav_Home"]</MudNavLink>
+                <MudNavLink Href="fincas/nueva" Icon="@Icons.Material.Filled.HomeWork">@L["Nav_AddProperty"]</MudNavLink>
+                <MudNavGroup Title="@L["Language"]" Icon="@Icons.Material.Filled.Language" Expanded="false">
+                    <MudNavLink OnClick="@(() => ChangeLanguage("es"))">Español</MudNavLink>
+                    <MudNavLink OnClick="@(() => ChangeLanguage("en"))">English</MudNavLink>
+                </MudNavGroup>
+                <MudDivider Class="my-2" />
                 <AuthorizeView>
-                    <Authorized>
-                        <MudButton StartIcon="@Icons.Material.Filled.Logout" Variant="Variant.Text" Color="Color.Primary" OnClick="Logout">
-                            Cerrar Sesión
-                        </MudButton>
-                    </Authorized>
                     <NotAuthorized>
-                        <MudButton Href="/login" Variant="Variant.Text" Color="Color.Primary">Iniciar Sesión</MudButton>
-                        <MudButton Href="/register" Variant="Variant.Filled" Color="Color.Primary" Class="ml-2">Registrarse</MudButton>
+                        <MudNavLink Href="authentication/login" Icon="@Icons.Material.Filled.Login">Login</MudNavLink>
+                        <MudNavLink Href="authentication/register" Icon="@Icons.Material.Filled.PersonAdd" Class="mud-nav-link-primary">Register</MudNavLink>
                     </NotAuthorized>
+                    <Authorized>
+                        <MudNavLink Href="my-reservations" Icon="@Icons.Material.Filled.CalendarMonth">Mis Reservas</MudNavLink>
+                        <MudNavLink Icon="@Icons.Material.Filled.Logout">Cerrar Sesión</MudNavLink>
+                    </Authorized>
                 </AuthorizeView>
-            </div>
-        </div>
+            </MudNavMenu>
+        </MudDrawer>
+    </MudHidden>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
+    @* --- ÁREA DE CONTENIDO PRINCIPAL --- *@
+    <MudMainContent Class="content-area pt-16">
+        @Body
+    </MudMainContent>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+    @* --- NUEVO: FOOTER ELÉGANTE --- *@
+    <MudFooter Elevation="1" Color="Color.Surface" Class="pa-6 mt-16">
+        <MudContainer MaxWidth="MaxWidth.Large">
+            <MudGrid Spacing="4">
+                <MudItem xs="12" md="4">
+                    <MudText Typo="Typo.h6" Color="Color.Primary" Class="font-weight-bold">Findcas</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mt-2">
+                        Encuentra el lugar perfecto para tu próximo descanso.
+                    </MudText>
+                </MudItem>
+                <MudItem xs="6" md="4">
+                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">Empresa</MudText>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block mb-1">Sobre Nosotros</MudLink>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block mb-1">Contacto</MudLink>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block">Términos y Condiciones</MudLink>
+                </MudItem>
+                <MudItem xs="6" md="4">
+                    <MudText Typo="Typo.subtitle1" Class="font-weight-bold mb-2">Explorar</MudText>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block mb-1">Todas las Fincas</MudLink>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block mb-1">Cómo Funciona</MudLink>
+                    <MudLink Href="#" Color="Color.Secondary" Class="d-block">Publicar tu Finca</MudLink>
+                </MudItem>
+            </MudGrid>
+            <MudDivider Class="my-4" />
+            <MudText Typo="Typo.body2" Color="Color.Secondary" Align="Align.Center">
+                © @DateTime.Now.Year Findcas. Todos los derechos reservados.
+            </MudText>
+        </MudContainer>
+    </MudFooter>
+</MudLayout>
 
 @code {
+    bool _drawerOpen = false;
 
-    private async Task Logout()
+    private void ChangeLanguage(string culture)
     {
-        await LocalStorage.RemoveItemAsync("authToken");
-
-        if (AuthStateProvider is CustomAuthStateProvider customProvider)
-        {
-            customProvider.NotifyUserLogout();
-        }
-
-        NavManager.NavigateTo("/", forceLoad: true);
+        var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var query = $"/Culture/Set?culture={culture}&redirectUri={uri}";
+        Navigation.NavigateTo(query, forceLoad: true);
     }
 }
+
+<style>
+    .content-area {
+        background-color: #f8f9fa;
+        min-height: 80vh; 
+    }
+
+    .mud-nav-link-primary {
+        background-color: var(--mud-palette-primary) !important;
+        color: white !important;
+        border-radius: 9999px;
+        margin-top: 8px;
+    }
+</style>

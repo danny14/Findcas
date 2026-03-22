@@ -66,5 +66,18 @@ namespace Findcas.Web.Client.Services
                 return null;
             }
         }
+
+        public async Task<IEnumerable<string>> SearchColombiaCitiesAsync(string searchQuery)
+        {
+            if (string.IsNullOrWhiteSpace(searchQuery))
+            {
+                return new List<string>();
+            }
+
+            // Hacemos la petición a la API del backend
+            var result = await _httpClient.GetFromJsonAsync<IEnumerable<string>>($"api/properties/cities/search?searchQuery={searchQuery}");
+
+            return result ?? new List<string>();
+        }
     }
 }

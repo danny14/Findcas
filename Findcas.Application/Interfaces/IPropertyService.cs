@@ -15,5 +15,7 @@ namespace Findcas.Application.Interfaces
 
         Task<Property?> GetPropertyByIdAsync(int id);
 
+        Task<IEnumerable<string>> SearchColombiaCitiesAsync(string searchQuery);
+
     }
 }

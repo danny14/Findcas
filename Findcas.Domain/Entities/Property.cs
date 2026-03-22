@@ -32,5 +32,7 @@ namespace Findcas.Domain.Entities
 
         public ICollection<PropertyImage> Images { get; set; } = new List<PropertyImage>();
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
+        public List<Amenity> Amenities { get; set; } = new();
     }
 }

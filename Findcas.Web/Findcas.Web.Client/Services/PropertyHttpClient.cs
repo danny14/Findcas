@@ -1,17 +1,22 @@
 ﻿using Findcas.Application.Interfaces;
 using Findcas.Domain.Entities;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Findcas.Web.Client.Services
 {
     public class PropertyHttpClient : IPropertyService
     {
         private readonly HttpClient _httpClient;
+        private readonly NavigationManager _navManager;
 
-        public PropertyHttpClient(HttpClient httpClient)
+        public PropertyHttpClient(HttpClient httpClient, NavigationManager navManager)
         {
             _httpClient = httpClient;
+            _navManager = navManager;
         }
 
         public async Task<int> CreatePropertyAsync(Property property, IBrowserFile? file)
@@ -52,7 +57,26 @@ namespace Findcas.Web.Client.Services
 
         public async Task<List<Property>> GetAllPropertiesAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<Property>>("api/properties") ?? new();
+            try
+            {
+
+                var absoluteUrl = _navManager.ToAbsoluteUri("api/properties").ToString();
+                var jsonString = await _httpClient.GetStringAsync(absoluteUrl);
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles
+                };
+
+                var result = JsonSerializer.Deserialize<List<Property>>(jsonString, options);
+                return result ?? new List<Property>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERROR DE TRADUCCIÓN JSON: {ex.Message}");
+                return new List<Property>();
+            }
         }
 
         public async Task<Property?> GetPropertyByIdAsync(int id)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Findcas.Domain.Entities
@@ -31,6 +32,7 @@ namespace Findcas.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<PropertyImage> Images { get; set; } = new List<PropertyImage>();
+        [JsonIgnore]
         public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
         public List<Amenity> Amenities { get; set; } = new();

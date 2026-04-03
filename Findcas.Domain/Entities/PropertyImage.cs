@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Findcas.Domain.Entities
@@ -14,6 +15,8 @@ namespace Findcas.Domain.Entities
         public bool IsMain { get; set; } 
 
         public int PropertyId { get; set; }
+
+        [JsonIgnore]
         public Property Property { get; set; } = null!;
     }
 }

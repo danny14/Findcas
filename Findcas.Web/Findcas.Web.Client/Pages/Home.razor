@@ -1,56 +1,37 @@
 ﻿@page "/"
 @using Findcas.Domain.Entities
 @using Findcas.Application.Interfaces
+@using Findcas.Web.Client.Components
 @inject IPropertyService PropertyService
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-10 mb-10">
-    @* Títulos principales con un toque más elegante *@
-    <MudText Typo="Typo.h3" Class="font-weight-bold mb-2">Explora Fincas</MudText>
-    <MudText Typo="Typo.h6" Color="Color.Secondary" Class="mb-10">
-        Encuentra el lugar perfecto para tu próximo descanso
-    </MudText>
-    
-    @* --- BARRA DE BÚSQUEDA Y FILTRO INTEGRADA (TIPO AIRBNB) CORREGIDA --- *@
-    <MudPaper Elevation="1" Class="pa-4 py-md-2 px-md-6 responsive-search-bar mb-12" Outlined="true">
-        <MudGrid Spacing="2" Class="align-center">
-            <MudItem xs="12" md="4">
-                <MudAutocomplete T="string"
-                                 Label="Ubicación"
-                                 Placeholder="Ej. Cali, Valle del Cauca"
-                                 Variant="Variant.Outlined"
-                                 Adornment="Adornment.Start"
-                                 AdornmentIcon="@Icons.Material.Filled.LocationOn"
-                                 Rounded="true"
-                                 SearchFunc="@SearchLocationAsync"
-                                 ResetValueOnEmptyText="true"
-                                 CoerceText="true"
-                                 CoerceValue="false" />
+<MudContainer MaxWidth="MaxWidth.Large" Class="text-center py-10 mb-16">
+    @* --- HERO SECTION --- *@
+    <MudText Typo="Typo.h2" Class="font-weight-bold mb-3" style="color: #2C2C2C;">Explora Fincas</MudText>
+
+    @* --- BARRA DE BÚSQUEDA --- *@
+    <MudPaper Elevation="1" Outlined="true" Class="rounded-pill pa-2 search-bar mb-16 mx-auto" style="background-color: white; max-width: 900px;">
+        <MudGrid Spacing="0" Class="align-center">
+            <MudItem xs="12" md="4" Class="px-3 d-flex align-center cursor-pointer search-item divider-right">
+                <MudAutocomplete T="string" Placeholder="Ej. Cali, Valle del Cauca" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.LocationOn" SearchFunc="@SearchLocationAsync" ResetValueOnEmptyText="true" CoerceText="true" CoerceValue="false" Class="no-margins w-100" />
             </MudItem>
-            <MudItem xs="12" sm="6" md="3">
-                <MudDateRangePicker Label="Fechas" Variant="Variant.Outlined" Color="Color.Primary" Rounded="true" />
+            <MudItem xs="6" md="3" Class="px-3 d-flex align-center cursor-pointer search-item divider-right">
+                <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="mr-3 mud-text-secondary" Size="Size.Medium" />
+                <MudText Typo="Typo.body2" Class="font-weight-bold">Fechas</MudText>
             </MudItem>
-            <MudItem xs="12" sm="6" md="2">
-                <MudNumericField T="int" Label="Huéspedes" Min="1" Value="2" Variant="Variant.Outlined" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Groups" Rounded="true" />
+            <MudItem xs="6" md="2" Class="px-3 d-flex align-center cursor-pointer search-item">
+                <MudIcon Icon="@Icons.Material.Filled.Group" Class="mr-3 mud-text-secondary" Size="Size.Medium" />
+                <MudText Typo="Typo.body2" Class="font-weight-bold">Huéspedes</MudText>
             </MudItem>
-            <MudItem xs="12" md="3" Class="d-flex align-center justify-end">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="rounded-pill px-6 py-3" FullWidth="true">
-                    Buscar
-                </MudButton>
-                @* Ocultamos el botón de filtros extra en móvil para ahorrar espacio *@
-                <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                    <MudIconButton Icon="@Icons.Material.Filled.Tune" Color="Color.Primary" Class="ml-2" />
-                </MudHidden>
+            <MudItem xs="12" md="3" Class="d-flex justify-end pr-3">
+                <MudIconButton Variant="Variant.Filled" Color="Color.Primary" Icon="@Icons.Material.Filled.Search" Size="Size.Large" Class="rounded-circle" />
             </MudItem>
         </MudGrid>
     </MudPaper>
 
-    @* Grilla de Fincas - Asumimos que la lógica de carga de _properties ya existe y funciona *@
+    @* --- GRILLA DE FINCAS --- *@
     @if (_properties == null)
     {
-        <MudStack AlignItems="AlignItems.Center" Class="mt-10">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
-            <MudText Typo="Typo.h6">Cargando fincas disponibles...</MudText>
-        </MudStack>
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
     }
     else if (!_properties.Any())
     {
@@ -58,11 +39,11 @@
     }
     else
     {
-        <MudGrid>
+        <MudGrid Spacing="4">
             @foreach (var property in _properties)
             {
                 <MudItem xs="12" sm="6" md="4" lg="3">
-                    <PropertyCard Property="property" />
+                    <PropertyCard Property="@property" />
                 </MudItem>
             }
         </MudGrid>
@@ -74,8 +55,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Asumimos que esta llamada ya existe y funciona
-        _properties = await PropertyService.GetAllPropertiesAsync();
+        try
+        {
+            _properties = await PropertyService.GetAllPropertiesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al buscar: {ex.Message}");
+            _properties = new List<Property>();
+        }
     }
 
     private async Task<IEnumerable<string>> SearchLocationAsync(string value, CancellationToken token)
@@ -85,18 +73,40 @@
 }
 
 <style>
-    /* 1. Mobile First: Bordes redondeados suaves para celular */
-    .responsive-search-bar {
-        border-radius: 16px !important;
+    .olive-text {
+        color: #6C7A55 !important;
     }
 
-    /* 2. Desktop: Cuando la pantalla es ancha (md = 960px o más), usamos forma de píldora */
-    @@media(min-width: 960px) {
-        .responsive-search-bar
-
-    {
-        border-radius: 9999px !important;
+    .search-bar {
+        border: 1px solid #EEE;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
     }
 
+    .search-item:hover {
+        background-color: #F8F9FA;
+        border-radius: 9999px;
+    }
+
+    .divider-right {
+        border-right: 1px solid #EEE;
+    }
+
+    .no-margins .mud-input-control-input-container {
+        margin-top: 0 !important;
+    }
+
+    @@media (max-width: 960px) {
+        .search-bar {
+            border-radius: 20px !important;
+        }
+
+        .divider-right {
+            border-right: none !important;
+            border-bottom: 1px solid #EEE;
+        }
+
+        .search-item:hover {
+            border-radius: 0;
+        }
     }
 </style>

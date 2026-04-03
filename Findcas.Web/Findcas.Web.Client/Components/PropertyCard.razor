@@ -1,30 +1,46 @@
 ﻿@using Findcas.Domain.Entities
 @using MudBlazor
-@using Microsoft.Extensions.Localization
-@using Findcas.Web.Client.Resources
-@inject IStringLocalizer<App> L
 @inject NavigationManager Navigation
 
 <MudPaper Elevation="0" Class="property-card" @onclick="GoToDetails">
-    <div class="image-container mb-3">
-        <MudImage Src="@GetImageUrl()" Alt="@Property.Name" ObjectFit="ObjectFit.Cover" Class="rounded-lg property-image" />
+    @* Contenedor de la imagen con bordes redondeados solo arriba *@
+    <div class="image-container">
+        <MudImage Src="@GetImageUrl()" Alt="@Property.Name" ObjectFit="ObjectFit.Cover" Class="property-image" />
     </div>
 
-    <div class="px-1">
-        <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-truncate">@Property.Name</MudText>
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-1 text-truncate">
-            @Property.City, @Property.Department
+    <div class="pa-4">
+        @* Nombre de la finca *@
+        <MudText Typo="Typo.subtitle1" Class="font-weight-bold text-truncate property-title mb-1">
+            @Property.Name
         </MudText>
 
-        @* ¡Regresamos a tus MudChips ganadores! Ajustados al tamaño del nuevo diseño *@
-        <MudStack Row="true" Class="mt-1 mb-2 flex-wrap" Spacing="2">
-            <MudChip T="string" Icon="@Icons.Material.Filled.Groups" Variant="Variant.Text" Size="Size.Small">@Property.MaxGuests</MudChip>
-            <MudChip T="string" Icon="@Icons.Material.Filled.Bed" Variant="Variant.Text" Size="Size.Small">@Property.Bedrooms</MudChip>
-            <MudChip T="string" Icon="@Icons.Material.Filled.Bathtub" Variant="Variant.Text" Size="Size.Small">@Property.Bathrooms</MudChip>
+        @* Ubicación con icono gris *@
+        <div class="d-flex align-center mb-3 text-muted">
+            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Class="mr-1" />
+            <MudText Typo="Typo.body2" Class="text-truncate">
+                @Property.City, @Property.Department
+            </MudText>
+        </div>
+
+        @* Características (Camas, Baños, Personas) alineadas al diseño *@
+        <MudStack Row="true" Spacing="3" Class="mb-3">
+            <div class="d-flex align-center">
+                <MudIcon Icon="@Icons.Material.Filled.Bed" Size="Size.Small" Class="mr-1 text-muted" />
+                <MudText Typo="Typo.body2" Class="font-weight-medium">@Property.Bedrooms</MudText>
+            </div>
+            <div class="d-flex align-center">
+                <MudIcon Icon="@Icons.Material.Filled.Bathtub" Size="Size.Small" Class="mr-1 text-muted" />
+                <MudText Typo="Typo.body2" Class="font-weight-medium">@Property.Bathrooms</MudText>
+            </div>
+            <div class="d-flex align-center">
+                <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Small" Class="mr-1 text-muted" />
+                <MudText Typo="Typo.body2" Class="font-weight-medium">@Property.MaxGuests</MudText>
+            </div>
         </MudStack>
 
-        <MudText Typo="Typo.body1" Class="mt-1">
-            <span class="font-weight-bold">$@Property.PricePerNight.ToString("N0")</span> @L["Card_PricePerNight"]
+        @* Precio resaltado en verde (Como en el mockup de Stitch) *@
+        <MudText Typo="Typo.body2" Class="price-text">
+            <span class="text-muted font-weight-regular">Desde</span> $@Property.PricePerNight.ToString("N0") <span class="text-muted font-weight-regular">/ noche</span>
         </MudText>
     </div>
 </MudPaper>
@@ -46,24 +62,44 @@
 }
 
 <style>
+    /* Estilos estructurales y de animación para la tarjeta */
     .property-card {
         cursor: pointer;
-        background-color: transparent;
-        transition: transform 0.2s ease-in-out;
+        border-radius: 20px !important; /* Curva pronunciada como en el diseño */
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        overflow: hidden; /* Evita que la imagen se salga de los bordes curvos */
+        border: 1px solid #EAEAEA;
+        background-color: #FFFFFF;
     }
 
+        /* Efecto hover suave (levanta la tarjeta ligeramente) */
         .property-card:hover {
-            transform: scale(1.02);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08) !important;
         }
 
     .image-container {
         width: 100%;
-        aspect-ratio: 1 / 1;
+        height: 220px; /* Altura fija para mantener consistencia en la grilla */
         overflow: hidden;
     }
 
     .property-image {
         width: 100%;
         height: 100%;
+    }
+
+    /* Colores extraídos de la propuesta visual */
+    .property-title {
+        color: #2C2C2C;
+    }
+
+    .text-muted {
+        color: #757575 !important;
+    }
+
+    .price-text {
+        color: #79A15F !important; /* El tono verde característico de tu diseño */
+        font-weight: 700;
     }
 </style>
